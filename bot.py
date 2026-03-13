@@ -247,7 +247,7 @@ def webhook():
 if __name__ == "__main__":
     print("Киноглаз Народа запущен 👁")
     # Устанавливаем webhook при старте
-    url = f"https://<твой-домен-на-render>/{BOT_TOKEN}"
+    url = f"https://kinoglaz_naroda.onrender.com/{BOT_TOKEN}"
     asyncio.run(bot_app.bot.set_webhook(url))
     print("Webhook установлен на", url)
 
