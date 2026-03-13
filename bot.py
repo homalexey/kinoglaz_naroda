@@ -256,17 +256,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------- MAIN ----------
 
-import asyncio
-
-def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.add_handler(CallbackQueryHandler(button_handler))
-    print("Киноглаз Народа запущен 👁")
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(app.run_polling())
-
 if __name__ == "__main__":
-    main()
+    print("Киноглаз Народа запущен 👁")
+    app.run(host="0.0.0.0", port=PORT)
+
+@app.before_first_request
+def set_webhook():
+    url = f"https://<твой-домен-на-render>/{BOT_TOKEN}"
+    bot_app.bot.set_webhook(url)
+    print("Webhook установлен на", url)
