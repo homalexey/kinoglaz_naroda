@@ -154,6 +154,8 @@ def format_message(title, year, ratings, verdict):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    if not update.message or not update.message.text:
+        return
     text = update.message.text.strip()
 
     # если это группа
@@ -211,7 +213,7 @@ async def process_movie(update, context, movie):
 
     message = format_message(movie["title"], movie["year"], ratings, verdict)
 
-    await update.message.reply_text(message)
+    await update.effective_chat.send_message(message)
 
 
 # ---------- BUTTON HANDLER ----------
@@ -231,7 +233,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     movie = movies[index]
 
-    await process_movie(query.message, context, movie)
+    await process_movie(update, context, movie)
 
 bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
 
