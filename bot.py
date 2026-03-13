@@ -242,15 +242,13 @@ def webhook():
     bot_app.update_queue.put(update)
     return "OK"
 
-# --- при старте устанавливаем webhook ---
-@app.before_first_request
-def set_webhook():
-    url = f"https://<твой-домен-на-render>/{BOT_TOKEN}"
-    bot_app.bot.set_webhook(url)
-    print("Webhook установлен на", url)
-
 # ---------- MAIN ----------
 
 if __name__ == "__main__":
     print("Киноглаз Народа запущен 👁")
+    # Устанавливаем webhook при старте
+    url = f"https://<твой-домен-на-render>/{BOT_TOKEN}"
+    bot_app.bot.set_webhook(url)
+    print("Webhook установлен на", url)
+
     app.run(host="0.0.0.0", port=PORT)
