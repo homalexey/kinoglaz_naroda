@@ -256,7 +256,4 @@ if __name__ == "__main__":
 
     asyncio.run(bot_app.initialize())
 
-    url = f"https://kinoglaz-naroda.onrender.com/{BOT_TOKEN}"
-    asyncio.run(bot_app.bot.set_webhook(url))
-
     app.run(host="0.0.0.0", port=PORT)
