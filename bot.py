@@ -253,12 +253,10 @@ async def start_dispatcher():
 
 if __name__ == "__main__":
     print("Киноглаз Народа запущен 👁")
-    # Устанавливаем webhook при старте
+
+    asyncio.run(bot_app.initialize())
+
     url = f"https://kinoglaz-naroda.onrender.com/{BOT_TOKEN}"
     asyncio.run(bot_app.bot.set_webhook(url))
-    print("Webhook установлен на", url)
-    
-    # Запускаем dispatcher в фоне
-    threading.Thread(target=lambda: asyncio.run(start_dispatcher()), daemon=True).start()
 
     app.run(host="0.0.0.0", port=PORT)
