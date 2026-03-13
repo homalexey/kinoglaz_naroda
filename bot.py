@@ -229,7 +229,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------- MAIN ----------
 
-async def main():
+import asyncio
+
+def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
@@ -237,8 +239,14 @@ async def main():
 
     print("Киноглаз Народа запущен 👁")
 
-    await app.run_polling()
-
+    # проверяем, есть ли уже event loop
+    try:
+        loop = asyncio.get_running_loop()
+        # если есть, создаём таск
+        loop.create_task(app.run_polling())
+    except RuntimeError:
+        # если нет, запускаем обычный polling
+        app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
