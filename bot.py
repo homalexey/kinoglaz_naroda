@@ -7,7 +7,6 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from flask import Flask, request
 from telegram.ext import (
     ApplicationBuilder,
-    Dispatcher,
     MessageHandler,
     CallbackQueryHandler,
     ContextTypes,
