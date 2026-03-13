@@ -21,6 +21,9 @@ PORT = int(os.getenv("PORT", 5000))
 
 app = Flask(__name__)
 
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
 # ---------- SEARCH MOVIES ----------
 
 def search_movies(query):
@@ -240,7 +243,7 @@ bot_app.add_handler(CallbackQueryHandler(button_handler))
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
-    asyncio.run(bot_app.process_update(update))
+    loop.create_task(bot_app.process_update(update))
     return "OK"
 
 async def start_dispatcher():
@@ -254,6 +257,6 @@ async def start_dispatcher():
 if __name__ == "__main__":
     print("Киноглаз Народа запущен 👁")
 
-    asyncio.run(bot_app.initialize())
+    loop.run_until_complete(bot_app.initialize())
 
     app.run(host="0.0.0.0", port=PORT)
