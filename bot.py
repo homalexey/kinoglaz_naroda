@@ -239,14 +239,7 @@ def main():
 
     print("Киноглаз Народа запущен 👁")
 
-    # проверяем, есть ли уже event loop
-    try:
-        loop = asyncio.get_running_loop()
-        # если есть, создаём таск
-        loop.create_task(app.run_polling())
-    except RuntimeError:
-        # если нет, запускаем обычный polling
-        app.run_polling()
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
