@@ -260,6 +260,7 @@ if __name__ == "__main__":
     print("Киноглаз Народа запущен 👁")
 
     loop.run_until_complete(bot_app.initialize())
+    loop.run_until_complete(bot_app.start())
 
     threading.Thread(target=loop.run_forever, daemon=True).start()
     
