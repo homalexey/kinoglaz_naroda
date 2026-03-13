@@ -259,4 +259,6 @@ if __name__ == "__main__":
 
     loop.run_until_complete(bot_app.initialize())
 
+    threading.Thread(target=loop.run_forever, daemon=True).start()
+    
     app.run(host="0.0.0.0", port=PORT)
