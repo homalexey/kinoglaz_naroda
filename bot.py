@@ -233,13 +233,13 @@ import asyncio
 
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
-
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button_handler))
-
     print("Киноглаз Народа запущен 👁")
 
-    app.run_polling()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(app.run_polling())
 
 if __name__ == "__main__":
     main()
