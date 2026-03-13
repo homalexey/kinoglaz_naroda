@@ -2,6 +2,7 @@ import os
 import re
 import requests
 import asyncio
+import threading
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from flask import Flask, request
@@ -242,6 +243,12 @@ def webhook():
     bot_app.update_queue.put(update)
     return "OK"
 
+async def start_dispatcher():
+    await bot_app.initialize()
+    await bot_app.start()
+    print("Dispatcher запущен")
+    # Telegram теперь будет обрабатывать update_queue
+
 # ---------- MAIN ----------
 
 if __name__ == "__main__":
@@ -250,5 +257,8 @@ if __name__ == "__main__":
     url = f"https://kinoglaz_naroda.onrender.com/{BOT_TOKEN}"
     asyncio.run(bot_app.bot.set_webhook(url))
     print("Webhook установлен на", url)
+    
+    # Запускаем dispatcher в фоне
+    threading.Thread(target=lambda: asyncio.run(start_dispatcher()), daemon=True).start()
 
     app.run(host="0.0.0.0", port=PORT)
