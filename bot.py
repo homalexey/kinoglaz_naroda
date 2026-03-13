@@ -4,8 +4,10 @@ import requests
 import asyncio
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from flask import Flask, request
 from telegram.ext import (
     ApplicationBuilder,
+    Dispatcher,
     MessageHandler,
     CallbackQueryHandler,
     ContextTypes,
@@ -15,7 +17,32 @@ from telegram.ext import (
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 TMDB_KEY = os.getenv("TMDB_KEY")
 OMDB_KEY = os.getenv("OMDB_KEY")
+PORT = int(os.getenv("PORT", 5000))
 
+app = Flask(__name__)
+bot_app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+# --- твои обработчики ---
+bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+bot_app.add_handler(CallbackQueryHandler(button_handler))
+
+# --- endpoint для Telegram webhook ---
+@app.route(f"/{BOT_TOKEN}", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), bot_app.bot)
+    bot_app.update_queue.put(update)
+    return "OK"
+
+# --- при старте устанавливаем webhook ---
+@app.before_first_request
+def set_webhook():
+    url = f"https://<твой-домен-на-render>/{BOT_TOKEN}"
+    bot_app.bot.set_webhook(url)
+    print("Webhook установлен на", url)
+
+# --- запуск Flask ---
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=PORT)
 
 # ---------- SEARCH MOVIES ----------
 
