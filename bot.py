@@ -262,6 +262,11 @@ if __name__ == "__main__":
     loop.run_until_complete(bot_app.initialize())
     loop.run_until_complete(bot_app.start())
 
+    # установить webhook
+    WEBHOOK_URL = f"https://kinoglaz-naroda.onrender.com/{BOT_TOKEN}"
+    loop.run_until_complete(bot_app.bot.set_webhook(WEBHOOK_URL))
+    print("Webhook установлен:", WEBHOOK_URL)
+
     threading.Thread(target=loop.run_forever, daemon=True).start()
-    
+
     app.run(host="0.0.0.0", port=PORT)
