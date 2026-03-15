@@ -70,7 +70,8 @@ def get_imdb_id(tmdb_id):
 
     r = requests.get(url, params=params).json()
 
-    return r["external_ids"]["imdb_id"]
+    external = r.get("external_ids", {})
+    return external.get("imdb_id")
 
 #---------- GET KP ID ----------
 
@@ -144,8 +145,9 @@ def get_letterboxd_rating(title):
 # ---------- GET RATINGS ----------
 
 def get_ratings(imdb_id, title, year):
-
-    url = "http://www.omdbapi.com/"
+    
+    if imdb_id:
+        url = "http://www.omdbapi.com/"
 
     params = {
         "apikey": OMDB_KEY,
@@ -339,8 +341,8 @@ def webhook():
     asyncio.run_coroutine_threadsafe(
         bot_app.process_update(update), loop
     )
-    return "OK"
     print("UPDATE RECEIVED")
+    return "OK"
 
 async def start_dispatcher():
     await bot_app.initialize()
