@@ -237,9 +237,9 @@ def format_message(title, original_title, year, ratings, verdict):
     text += "\n👁 Киноглаз Народа говорит\n\n"
 
     if verdict:
-        text += "Этот фильм стоит посмотреть"
+        text += "✅ <b>Этот фильм стоит посмотреть</b>"
     else:
-        text += "Этот фильм не стоит просмотра"
+        text += "❌ <b>Этот фильм не стоит просмотра</b>"
 
     return text
 
@@ -307,7 +307,7 @@ async def process_movie(update, context, movie):
 
     message = format_message(movie["title"], movie["original_title"], movie["year"], ratings, verdict)
 
-    await update.effective_chat.send_message(message)
+    await update.effective_chat.send_message(message, parse_mode="HTML")
 
 
 # ---------- BUTTON HANDLER ----------
