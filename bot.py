@@ -17,6 +17,7 @@ from telegram.ext import (
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 TMDB_KEY = os.getenv("TMDB_KEY")
 OMDB_KEY = os.getenv("OMDB_KEY")
+KP_API_KEY = os.getenv("KP_API_KEY")
 PORT = int(os.getenv("PORT", 5000))
 
 app = Flask(__name__)
@@ -71,10 +72,78 @@ def get_imdb_id(tmdb_id):
 
     return r["external_ids"]["imdb_id"]
 
+#---------- GET KP ID ----------
 
+def get_kinopoisk_rating(title, year):
+
+    url = "https://kinopoiskapiunofficial.tech/api/v2.1/films/search-by-keyword"
+
+    headers = {
+        "X-API-KEY": KP_API_KEY
+    }
+
+    params = {
+        "keyword": title
+    }
+
+    r = requests.get(url, headers=headers, params=params).json()
+
+    films = r.get("films", [])
+
+    for film in films:
+
+        if str(year) in str(film.get("year", "")):
+            rating = film.get("rating")
+
+            if rating and rating != "null":
+                return float(rating)
+
+    return None
+
+# ---------- GET LB SLUG ----------
+
+def make_letterboxd_slug(title):
+
+    slug = title.lower()
+
+    slug = slug.replace(":", "")
+    slug = slug.replace(".", "")
+    slug = slug.replace("'", "")
+    slug = slug.replace(",", "")
+
+    slug = slug.replace(" ", "-")
+
+    return slug
+
+# ---------- GET LB RATING ----------
+
+def get_letterboxd_rating(title):
+
+    slug = make_letterboxd_slug(title)
+
+    url = f"https://lbxd.vercel.app/film/{slug}"
+
+    try:
+        r = requests.get(url, timeout=5)
+
+        if r.status_code != 200:
+            return None
+
+        data = r.json()
+
+        rating = data.get("rating")
+
+        if rating:
+            return float(rating)
+
+    except:
+        return None
+
+    return None
+    
 # ---------- GET RATINGS ----------
 
-def get_ratings(imdb_id):
+def get_ratings(imdb_id, title, year):
 
     url = "http://www.omdbapi.com/"
 
@@ -89,6 +158,14 @@ def get_ratings(imdb_id):
 
     if r.get("imdbRating") and r["imdbRating"] != "N/A":
         ratings["imdb"] = float(r["imdbRating"])
+
+    kp = get_kinopoisk_rating(title, year)
+    if kp:
+        ratings["kp"] = kp
+
+    lb = get_letterboxd_rating(title)
+    if lb:
+        ratings["lb"] = lb
 
     for item in r.get("Ratings", []):
 
@@ -116,6 +193,12 @@ def make_verdict(ratings):
     if "mc" in ratings:
         votes.append(ratings["mc"] >= 60)
 
+    if "kp" in ratings:
+        votes.append(ratings["kp"] >= 6)
+
+    if "lb" in ratings:
+        votes.append(ratings["lb"] >= 3)
+
     if not votes:
         return False
 
@@ -139,6 +222,14 @@ def format_message(title, year, ratings, verdict):
     if "mc" in ratings:
         mark = "✅" if ratings["mc"] >= 60 else "❌"
         text += f"Metacritic: {ratings['mc']} / 100 {mark}\n"
+
+    if "kp" in ratings:
+        mark = "✅" if ratings["kp"] >= 6 else "❌"
+        text += f"Кинопоиск: {ratings['kp']} / 10 {mark}\n"
+
+    if "lb" in ratings:
+        mark = "⭐"
+        text += f"Letterboxd: {ratings['lb']} / 5 {mark}\n"
 
     text += "\n👁 Киноглаз Народа\n\n"
 
@@ -207,7 +298,7 @@ async def process_movie(update, context, movie):
 
     imdb_id = get_imdb_id(movie["tmdb_id"])
 
-    ratings = get_ratings(imdb_id)
+    ratings = get_ratings(imdb_id, movie["title"], movie["year"])
 
     verdict = make_verdict(ratings)
 
@@ -245,7 +336,9 @@ bot_app.add_handler(CallbackQueryHandler(button_handler))
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
-    loop.run_until_complete(bot_app.process_update(update))
+    asyncio.run_coroutine_threadsafe(
+        bot_app.process_update(update), loop
+    )
     return "OK"
     print("UPDATE RECEIVED")
 
