@@ -50,6 +50,7 @@ def search_movies(query):
 
         results.append({
             "title": movie["title"],
+            "original_title": movie["original_title"],
             "year": year,
             "tmdb_id": movie["id"]
         })
@@ -209,9 +210,9 @@ def make_verdict(ratings):
 
 # ---------- FORMAT MESSAGE ----------
 
-def format_message(title, year, ratings, verdict):
+def format_message(title, original_title, year, ratings, verdict):
 
-    text = f"🎬 {title} ({year})\n\n"
+    text = f"🎬 {title} / {original_title} ({year})\n\n"
 
     if "imdb" in ratings:
         mark = "✅" if ratings["imdb"] >= 6 else "❌"
@@ -233,7 +234,7 @@ def format_message(title, year, ratings, verdict):
         mark = "⭐"
         text += f"Letterboxd: {ratings['lb']} / 5 {mark}\n"
 
-    text += "\n👁 Киноглаз Народа\n\n"
+    text += "\n👁 Киноглаз Народа говорит\n\n"
 
     if verdict:
         text += "Этот фильм стоит посмотреть"
@@ -300,11 +301,11 @@ async def process_movie(update, context, movie):
 
     imdb_id = get_imdb_id(movie["tmdb_id"])
 
-    ratings = get_ratings(imdb_id, movie["title"], movie["year"])
+    ratings = get_ratings(imdb_id, movie["original_title"], movie["year"])
 
     verdict = make_verdict(ratings)
 
-    message = format_message(movie["title"], movie["year"], ratings, verdict)
+    message = format_message(movie["title"], movie["original_title"], movie["year"], ratings, verdict)
 
     await update.effective_chat.send_message(message)
 
