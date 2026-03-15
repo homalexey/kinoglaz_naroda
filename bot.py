@@ -245,8 +245,9 @@ bot_app.add_handler(CallbackQueryHandler(button_handler))
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def webhook():
     update = Update.de_json(request.get_json(force=True), bot_app.bot)
-    loop.create_task(bot_app.process_update(update))
+    loop.run_until_complete(bot_app.process_update(update))
     return "OK"
+    print("UPDATE RECEIVED")
 
 async def start_dispatcher():
     await bot_app.initialize()
